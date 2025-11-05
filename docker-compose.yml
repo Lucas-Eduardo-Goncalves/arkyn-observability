@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "5177:9090"
+    networks:
+      - monitor
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "5176:3000"
+    networks:
+      - monitor
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "5178:8080"
+    networks:
+      - monitor
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    pid: "host"
+    ports:
+      - "5179:9100"
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - monitor
+
+networks:
+  monitor:
+    driver: bridge
