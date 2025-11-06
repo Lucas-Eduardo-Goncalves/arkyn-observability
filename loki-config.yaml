@@ -13,6 +13,9 @@ ingester:
   chunk_idle_period: 5m
   chunk_retain_period: 30s
   max_transfer_retries: 0
+  wal:
+    enabled: true
+    dir: /wal
 
 schema_config:
   configs:
@@ -42,3 +45,7 @@ chunk_store_config:
 table_manager:
   retention_deletes_enabled: false
   retention_period: 0s
+
+compactor:
+  working_directory: /loki/compactor
+  shared_store: filesystem

@@ -56,11 +56,14 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
     volumes:
       - ./loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki-data:/loki
+      - loki-wal:/wal
     ports:
       - "5180:3100"
     networks:
       - monitor
     restart: unless-stopped
+    user: "0:0"
   promtail:
     image: grafana/promtail:2.8.0
     container_name: promtail
@@ -76,3 +79,7 @@ services:
 networks:
   monitor:
     driver: bridge
+
+volumes:
+  loki-data:
+  loki-wal:
