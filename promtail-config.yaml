@@ -7,21 +7,36 @@ positions:
 
 clients:
   - url: http://loki:3100/loki/api/v1/push
+    batchwait: 1s
+    batchsize: 102400
+    timeout: 10s
 
 scrape_configs:
+  # Logs do sistema - apenas os mais importantes
   - job_name: system
     static_configs:
       - targets:
           - localhost
         labels:
-          job: varlogs
-          __path__: /var/log/**/*.log
+          job: system
+          __path__: /var/log/{auth,syslog,kern}.log
 
-  - job_name: docker-containers
-    pipeline_stages: []
+  # Containers Docker - configuração simplificada
+  - job_name: docker
     static_configs:
       - targets:
           - localhost
         labels:
           job: docker
           __path__: /var/lib/docker/containers/*/*-json.log
+    pipeline_stages:
+      - json:
+          expressions:
+            output: log
+            stream: stream
+      - regex:
+          source: filename
+          expression: "/var/lib/docker/containers/(?P<container_id>[a-zA-Z0-9]+)/"
+      - labels:
+          container_id:
+          stream:
